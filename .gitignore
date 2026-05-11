@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+school-frontend/node_modules/
+school-backend/node_modules/
+
+# Environment variables
+.env
+.env.*
+school-frontend/.env
+school-backend/.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+school-frontend/build/
+school-backend/build/
+
+# Vercel
+.vercel
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Misc
+.idea/
+.vscode/
