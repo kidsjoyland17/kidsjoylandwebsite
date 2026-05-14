@@ -1,21 +1,20 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
-// Usage:
-// <ProtectedRoute role="admin">   → only admins pass
-// <ProtectedRoute role="teacher"> → only teachers pass
-// <ProtectedRoute>                → any logged-in user passes
+const ROLE_HOME = {
+  admin:   "/admin/dashboard",
+  teacher: "/teacher/dashboard",
+};
 
 export default function ProtectedRoute({ children, role }) {
   const { user, loading } = useAuth();
 
-  // Still checking cookie — show nothing yet
   if (loading) {
     return (
       <div style={{
         display: "flex", alignItems: "center",
         justifyContent: "center", height: "100vh",
-        fontSize: 16, color: "#7a9990"
+        fontSize: 16, color: "#7a9990",
       }}>
         Loading…
       </div>
@@ -25,9 +24,12 @@ export default function ProtectedRoute({ children, role }) {
   // Not logged in → go to login
   if (!user) return <Navigate to="/login" replace />;
 
-  // Logged in but wrong role → go to login
-  if (role && user.role !== role) return <Navigate to="/login" replace />;
+  // Logged in but wrong role → send to their own home, not /login
+  // Bug #8 fix: previously sent everyone to /login which was confusing
+  if (role && user.role !== role) {
+    const fallback = ROLE_HOME[user.role] || "/";
+    return <Navigate to={fallback} replace />;
+  }
 
-  // All good
   return children;
 }

@@ -1,12 +1,16 @@
+import mongoose from "mongoose";
 import Result  from "../models/Result.model.js";
 import Student from "../models/Student.model.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
-import { DEFAULT_SUBJECTS } from "../constants/classSubjects.js"; // add at top
+import { DEFAULT_SUBJECTS } from "../constants/classSubjects.js";
 
-// Full populate string used everywhere
+// Full marks overrides — applied server-side so they can never be tampered with
+const FM_OVERRIDES = { "Drawing": 50, "EVS/Science+S.St": 200, "EVS": 200 };
+
+// Full populate string — field names must match Student.model.js exactly
 const STUDENT_POPULATE =
-  "name rollNo class section photo fatherName motherName dob admissionNo admNo aadharNo";
+  "name rollNo class section photo fatherName motherName dob admissionNo aadharNo";
 
 // ── POST /api/admin/results  →  Create or update result ─────────────────────
 export const upsertResult = async (req, res, next) => {
@@ -16,26 +20,48 @@ export const upsertResult = async (req, res, next) => {
     if (!studentId || !session)
       return sendError(res, "studentId and session are required", 400);
 
+    // Bug #4 fix — guard against non-ObjectId values hitting findById
+    if (!mongoose.isValidObjectId(studentId))
+      return sendError(res, "Invalid studentId", 400);
+
     const student = await Student.findById(studentId).lean();
     if (!student) return sendError(res, "Student not found", 404);
+
+    // Bug #1 fix — DEFAULT_SUBJECTS is an object keyed by className, NOT an array.
+    // Fix 5.1 — apply FM_OVERRIDES server-side on every save.
+    const buildDefaultSubjects = (className) =>
+      (DEFAULT_SUBJECTS[className] || []).map((name) => ({
+        subject:   name,
+        fullMarks: FM_OVERRIDES[name] ?? 100,
+      }));
+
+    const applyFMOverrides = (subjects) =>
+      subjects.map((s) => ({
+        ...s,
+        fullMarks: FM_OVERRIDES[s.subject] ?? s.fullMarks ?? 100,
+      }));
+
+    const resolvedSubjects = rest.subjects
+      ? applyFMOverrides(rest.subjects)
+      : buildDefaultSubjects(student.class);
 
     const resultData = {
       student:     studentId,
       session,
 
-      // ── Snapshot fields ──────────────────────────────────────────────────
+      // ── Snapshot fields (copied from Student at save time) ───────────────
       studentName: student.name,
-      rollNo:      rest.rollNo || student.rollNo || "",
+      rollNo:      rest.rollNo      || student.rollNo      || "",
       className:   student.class,
-      section:     student.section || "A",
+      section:     student.section  || "A",
       fatherName:  student.fatherName  || "",
       motherName:  student.motherName  || "",
       dob:         student.dob         || null,
-      admNo:       student.admissionNo || student.admNo || "",
+      admNo:       student.admissionNo || "",
       aadharNo:    student.aadharNo    || "",
 
       // ── Academic data ────────────────────────────────────────────────────
-      subjects: rest.subjects || DEFAULT_SUBJECTS.map(s => ({ ...s })),
+      subjects:           resolvedSubjects,
       englishSkills:      rest.englishSkills      || {},
       hindiSkills:        rest.hindiSkills        || {},
       attendance:         rest.attendance         || {},
@@ -48,10 +74,10 @@ export const upsertResult = async (req, res, next) => {
       responsibleDependable: rest.responsibleDependable || {},
       attitudeTeachers:      rest.attitudeTeachers      || {},
 
-      // ── Rank ────────────────────────────────────────────────────────────
+      // ── Rank ─────────────────────────────────────────────────────────────
       rank: rest.rank || {},
 
-      // ── Remarks / promotion ──────────────────────────────────────────────
+      // ── Remarks / promotion ───────────────────────────────────────────────
       remarks:         rest.remarks         || {},
       promoted:        rest.promoted        ?? null,
       promotedToClass: rest.promotedToClass || "",
@@ -104,9 +130,7 @@ export const getSessions = async (req, res, next) => {
   try {
     const dbSessions = await Result.distinct("session");
 
-    // Always include current year and next year even if no results exist yet
     const now = new Date();
-    // Academic year: if month >= April, current session is this year, else last year
     const baseYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
     const guaranteed = [
       `${baseYear}-${baseYear + 1}`,
@@ -114,7 +138,7 @@ export const getSessions = async (req, res, next) => {
     ];
 
     const merged = Array.from(new Set([...guaranteed, ...dbSessions]));
-    merged.sort((a, b) => b.localeCompare(a)); // newest first
+    merged.sort((a, b) => b.localeCompare(a));
     sendSuccess(res, merged);
   } catch (err) { next(err); }
 };
@@ -122,9 +146,12 @@ export const getSessions = async (req, res, next) => {
 // ── GET /api/admin/results/:id  →  Single result ────────────────────────────
 export const getResultById = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return sendError(res, "Invalid result ID", 400);
+
     const result = await Result.findById(req.params.id)
-      .populate("student",              STUDENT_POPULATE)
-      .populate("createdBy updatedBy",  "name")
+      .populate("student",             STUDENT_POPULATE)
+      .populate("createdBy updatedBy", "name")
       .lean();
     if (!result) return sendError(res, "Result not found", 404);
     sendSuccess(res, result);
@@ -134,6 +161,9 @@ export const getResultById = async (req, res, next) => {
 // ── GET /api/admin/results/student/:studentId?session=  ─────────────────────
 export const getResultByStudent = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.studentId))
+      return sendError(res, "Invalid studentId", 400);
+
     const { session } = req.query;
     const filter = { student: req.params.studentId };
     if (session) filter.session = session;
@@ -150,14 +180,16 @@ export const getResultByStudent = async (req, res, next) => {
 // ── DELETE /api/admin/results/:id ───────────────────────────────────────────
 export const deleteResult = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return sendError(res, "Invalid result ID", 400);
+
     const result = await Result.findByIdAndDelete(req.params.id);
     if (!result) return sendError(res, "Result not found", 404);
     sendSuccess(res, null, "Result deleted successfully");
   } catch (err) { next(err); }
 };
 
-
-// ── GET /api/admin/results/subjects/:className ──────────────────────────────
+// ── GET /api/admin/results/subjects/:className ───────────────────────────────
 export const getSubjectsByClass = async (req, res, next) => {
   try {
     const { className } = req.params;
@@ -165,8 +197,7 @@ export const getSubjectsByClass = async (req, res, next) => {
     if (!subjectNames)
       return sendError(res, `No subjects configured for class "${className}"`, 404);
 
-    const FM_OVERRIDES = { "Drawing": 50, "EVS/Science+S.St": 200, "EVS": 200 };
-    const subjects = subjectNames.map(name => ({
+    const subjects = subjectNames.map((name) => ({
       subject:   name,
       fullMarks: FM_OVERRIDES[name] ?? 100,
     }));

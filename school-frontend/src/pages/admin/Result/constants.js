@@ -1,6 +1,5 @@
 // ─── constants.js ─────────────────────────────────────────────────────────────
 
-
 export const SKILL_MAX = { read: 10, recitation: 15, spelling: 10, writing: 15 };
 
 export const GRADE_SCALE = [
@@ -13,11 +12,9 @@ export const GRADE_SCALE = [
   { min: 0,  max: 39,  grade: "F"  },
 ];
 
-const currentYear = new Date().getFullYear();
-export const SESSIONS = Array.from({ length: 6 }, (_, i) => {
-  const y = currentYear - i;
-  return `${y}-${y + 1}`;
-});
+// NOTE: SESSIONS constant removed — Bug 5.3 fix.
+// Sessions must always be fetched from the backend (/admin/results/sessions)
+// so they stay in sync with what's actually stored in the database.
 
 export const PERSONALITY_GRADES = ["", "A+", "A", "B", "C", "D", "E", "F"];
 
@@ -38,10 +35,6 @@ export const getGrade = (marks, fullMarks) => {
   return GRADE_SCALE.find(g => pct >= g.min && pct <= g.max)?.grade || "F";
 };
 
-/**
- * Each subject term is now an object: { unitTest, termExam, total }
- * totalObtained sums the `total` field across all subjects for a given term.
- */
 export const totalObtained = (subjects, term) =>
   subjects.reduce((sum, s) => {
     const v = typeof s[term] === "object" ? s[term]?.total : s[term];
@@ -53,12 +46,11 @@ export const totalFM = (subjects) =>
 
 // ─── Empty builders ───────────────────────────────────────────────────────────
 
-/** New per-term structure: Unit Test + Term Exam + Total */
 export const emptyTerm       = () => ({ unitTest: "", termExam: "", total: "" });
-export const emptySkills      = () => ({ read: "", recitation: "", spelling: "", writing: "" });
-export const emptyAttendance  = () => ({ workingDays: "", daysAbsent: "", totalStudents: "" });
-export const emptyPersonality = () => ({ firstTerm: "", secondTerm: "", final: "" });
-export const emptyRank        = () => ({ firstTerm: "", secondTerm: "", final: "", overall: "" });
+export const emptySkills     = () => ({ read: "", recitation: "", spelling: "", writing: "" });
+export const emptyAttendance = () => ({ workingDays: "", daysAbsent: "", totalStudents: "" });
+export const emptyPersonality= () => ({ firstTerm: "", secondTerm: "", final: "" });
+export const emptyRank       = () => ({ firstTerm: "", secondTerm: "", final: "", overall: "" });
 
 export function buildEmptyForm(subjects = [], session = "") {
   return {

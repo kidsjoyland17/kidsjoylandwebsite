@@ -14,6 +14,7 @@ import axios from "axios";
 // Axios to send the HttpOnly cookie automatically on every request.
 // No manual Authorization header needed.
 
+console.log("BASE URL:", import.meta.env.VITE_BASE_URL);
 const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:5000/api",
   withCredentials: true,                          // sends HttpOnly cookie automatically

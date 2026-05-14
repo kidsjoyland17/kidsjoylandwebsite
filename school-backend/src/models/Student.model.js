@@ -4,11 +4,11 @@ export const SECTIONS = ["A", "B", "C", "D"];
 
 const studentSchema = new mongoose.Schema(
   {
-    // ✅ Bug #9 fix — link Student to a User account
+    // Link Student to a User account (null = admin-created, no login yet)
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default: null,   // null = student has no login account yet (admin-created)
+      default: null,
     },
     name: {
       type: String,
@@ -20,27 +20,40 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Class is required"],
       trim: true,
     },
-    // Section A / B / C / D — admin assigns, defaults to "A"
     section: {
       type: String,
       enum: [...SECTIONS, ""],
       default: "A",
       trim: true,
     },
-    rollNo:      { type: String, trim: true },
-    gender:      { type: String, enum: ["Male", "Female", "Other", ""] },
-    dob:         { type: Date },
-    parentName:  { type: String, trim: true },
-    parentPhone: { type: String, trim: true },
-    address:     { type: String, trim: true },
-    photo:       { type: String },
+    rollNo:      { type: String, trim: true, default: "" },
+    gender:      { type: String, enum: ["Male", "Female", "Other", ""], default: "" },
+    dob:         { type: Date,   default: null },
+
+    // ── Bug #3 fix — fields needed for report card snapshots ──────────────
+    
+    fatherName:  { type: String, trim: true, default: "" },
+    motherName:  { type: String, trim: true, default: "" },
+    fatherPhone: { type: String, trim: true, default: "" },
+    motherPhone: { type: String, trim: true, default: "" },
+    admissionNo: { type: String, trim: true, default: "" },
+    aadharNo:    { type: String, trim: true, default: "" },
+
+    // ─────────────────────────────────────────────────────────────────────
+
+    // Legacy fields kept for backward-compat
+    parentName:  { type: String, trim: true, default: "" },
+    parentPhone: { type: String, trim: true, default: "" },
+
+    address: { type: String, trim: true, default: "" },
+    photo:   { type: String, default: "" },
   },
   { timestamps: true }
 );
 
-studentSchema.index({ name: "text", parentName: "text" });
+studentSchema.index({ name: "text", parentName: "text", fatherName: "text" });
 studentSchema.index({ user: 1 });
-studentSchema.index({ class: 1, section: 1 }); // fast class+section queries
+studentSchema.index({ class: 1, section: 1 });
 
 const Student = mongoose.model("Student", studentSchema);
 export default Student;

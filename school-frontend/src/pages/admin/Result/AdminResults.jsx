@@ -16,7 +16,6 @@ export default function AdminResults() {
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
 
-  // ── Meta state (fetched from backend) ──
   const [classes,  setClasses]  = useState([]);
   const [sessions, setSessions] = useState([]);
 
@@ -34,7 +33,6 @@ export default function AdminResults() {
   const [saving,   setSaving]   = useState(false);
   const [formErr,  setFormErr]  = useState("");
 
-  // ── Fetch classes and sessions on mount ──
   useEffect(() => {
     const fetchMeta = async () => {
       try {
@@ -45,13 +43,12 @@ export default function AdminResults() {
         setClasses(classRes.data?.data || []);
         setSessions(sessionRes.data?.data || []);
       } catch {
-        // non-fatal: filters just won't populate
+        // non-fatal
       }
     };
     fetchMeta();
   }, []);
 
-  // ── Fetch records ──
   const fetchRecords = useCallback(async () => {
     setLoading(true); setError("");
     try {
@@ -78,7 +75,6 @@ export default function AdminResults() {
     finally { setStudentsLoading(false); }
   };
 
-  // ── Save ──
   const handleSave = async (form) => {
     if (!form.studentId) return setFormErr("Please select a student.");
     setSaving(true); setFormErr("");
@@ -132,7 +128,6 @@ export default function AdminResults() {
     } finally { setSaving(false); }
   };
 
-  // ── Delete ──
   const handleDelete = async () => {
     setSaving(true);
     try {
@@ -144,12 +139,21 @@ export default function AdminResults() {
     } finally { setSaving(false); }
   };
 
-  // ── Print ──
+  // ── handlePrint ──────────────────────────────────────────────────────────
+  // Grabs the #report-card-print div (rendered by PrintReportCard) plus
+  // the <style> tag that PrintReportCard renders immediately before it,
+  // then injects both into a new window so CSS classes work in print.
   const handlePrint = () => {
     const printContent = document.getElementById("report-card-print");
     if (!printContent) return;
+
     const clone = printContent.cloneNode(true);
-    clone.querySelectorAll("style").forEach(el => el.remove());
+
+    // PrintReportCard renders: <style>{STYLES}</style>  <div id="report-card-print" ...>
+    // The style tag is the immediate previousElementSibling of the wrapper div.
+    const prevEl = printContent.previousElementSibling;
+    const componentCSS = prevEl?.tagName === "STYLE" ? prevEl.textContent : "";
+
     const win = window.open("", "_blank", "width=900,height=700");
     win.document.write(`<!DOCTYPE html>
 <html>
@@ -159,55 +163,26 @@ export default function AdminResults() {
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>${componentCSS}</style>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    html, body { background: #fff; font-family: 'Nunito', sans-serif; }
-    .rc-wrapper { display: flex; flex-direction: column; width: 210mm; margin: 0 auto; gap: 0; }
-    .rc-page { width: 210mm; height: 297mm; overflow: hidden; flex-shrink: 0; }
-    .inner-wrap { width:210mm; height:297mm; background:#fff; padding:3.5mm 4mm 3mm; display:flex; flex-direction:column; gap:1.8mm; overflow:hidden; }
-    .inner-header { display:flex; align-items:center; gap:2.5mm; border-bottom:1.5px solid #333; padding-bottom:2mm; }
-    .inner-logo { width:13mm; height:13mm; border-radius:50%; border:1.5px solid #1a3a8c; background:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
-    .inner-school-info { flex:1; text-align:center; }
-    .inner-school-name { font-family:'Poppins',sans-serif; font-size:11pt; font-weight:900; color:#1a3a8c; text-transform:uppercase; letter-spacing:0.4px; }
-    .inner-school-address { font-size:5.5pt; color:#444; line-height:1.4; }
-    .inner-report-title { font-family:'Poppins',sans-serif; font-size:7.5pt; font-weight:700; color:#1a3a8c; text-align:center; border:1.5px solid #1a3a8c; padding:1mm 3mm; border-radius:3px; white-space:nowrap; }
-    .student-info { display:grid; grid-template-columns:1fr 1fr; gap:1mm 4mm; font-size:6.5pt; border:1px solid #aaa; padding:2mm 3mm; border-radius:3px; }
-    .si-row { display:flex; align-items:baseline; gap:1mm; }
-    .si-label { font-weight:800; white-space:nowrap; min-width:19mm; }
-    .si-value { border-bottom:1px dotted #999; flex:1; font-style:italic; padding-bottom:1px; }
-    .marks-table { width:100%; border-collapse:collapse; font-size:5.2pt; }
-    .marks-table th, .marks-table td { border:1px solid #555; padding:1.5px 1.5px; text-align:center; }
-    .marks-table .th-main { background:#d0d8f0; font-weight:800; font-size:5.8pt; }
-    .marks-table .th-sub { background:#e8ecf8; font-weight:700; font-size:5pt; line-height:1.15; }
-    .marks-table .td-subject { text-align:left; padding-left:2px; font-weight:600; font-size:5.2pt; }
-    .marks-table .td-total { font-weight:800; background:#efefef; }
-    .marks-table .td-highlight { font-weight:800; background:#e8f4e8; }
-    .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:2.5mm; }
-    .social-table { width:100%; border-collapse:collapse; font-size:5.2pt; }
-    .social-table th, .social-table td { border:1px solid #555; padding:1.5px 2px; text-align:center; }
-    .social-table .th-main { background:#d0d8f0; font-weight:800; font-size:5.8pt; }
-    .social-table .td-label { text-align:left; padding-left:3px; font-size:5.2pt; }
-    .remarks-block { border:1px solid #555; padding:1.5mm 2.5mm; font-size:5.8pt; border-radius:2px; }
-    .remarks-label { font-weight:800; font-size:5.8pt; margin-bottom:0.8mm; }
-    .remarks-text { min-height:5mm; font-style:italic; }
-    .sigs-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:1.5mm; }
-    .sig-block { text-align:center; flex:1; }
-    .sig-line { border-bottom:1px solid #333; margin:0 2mm; height:8mm; }
-    .sig-label { font-size:5pt; font-weight:700; color:#333; margin-top:0.8mm; }
-    .section-title { font-family:'Poppins',sans-serif; font-size:5.8pt; font-weight:800; background:#d0d8f0; border:1px solid #555; text-align:center; padding:1px 2px; letter-spacing:0.3px; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    html, body { background:#fff; font-family:'Nunito',sans-serif; }
     @media print {
-      @page { size: A4 portrait; margin: 0; }
-      html, body { margin: 0; }
-      .rc-wrapper { display: block; width: 210mm; }
-      .rc-page { width: 210mm; height: 297mm; overflow: hidden; page-break-after: always; break-after: page; }
-      .rc-page:last-child { page-break-after: avoid; break-after: avoid; }
+      @page { size:A4 portrait; margin:0; }
+      html, body { margin:0; }
+      .rc-page { page-break-after:always; break-after:page; }
+      .rc-page:last-child { page-break-after:avoid; break-after:avoid; }
     }
   </style>
 </head>
 <body>${clone.outerHTML}</body>
 </html>`);
     win.document.close();
-    setTimeout(() => { win.focus(); win.print(); }, 1200);
+    // Wait for fonts to load before printing (Bug #10 fix)
+    win.document.fonts.ready.then(() => {
+      win.focus();
+      win.print();
+    });
   };
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
@@ -251,7 +226,6 @@ export default function AdminResults() {
               onChange={e => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
-          {/* Session filter — from backend */}
           <select
             className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-400 text-slate-600"
             value={filterSession} onChange={e => { setFilterSession(e.target.value); setPage(1); }}
@@ -259,7 +233,6 @@ export default function AdminResults() {
             <option value="">All Sessions</option>
             {sessions.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          {/* Class filter — from backend */}
           <select
             className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-400 text-slate-600"
             value={filterClass} onChange={e => { setFilterClass(e.target.value); setPage(1); }}
@@ -391,35 +364,31 @@ export default function AdminResults() {
       )}
 
       {/* ── PRINT MODAL ── */}
-{modal === "print" && selected && (
-  <Modal title={`Report Card — ${selected.studentName}`} onClose={() => setModal(null)} size="xl">
-    <div className="flex justify-end mb-4">
-      <button onClick={handlePrint}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
-        <PrinterIcon className="w-4 h-4"/>
-        Print / Save as PDF
-      </button>
-    </div>
-    <div className="overflow-auto rounded-xl bg-slate-200 p-4">
-      {/* Outer container sized to the scaled width so it doesn't overflow */}
-      <div style={{ width: "calc(210mm * 0.72)", margin: "0 auto" }}>
-        {/* Inner: full 210mm, scaled down from top-left */}
-        <div style={{
-          width: "210mm",
-          transformOrigin: "top left",
-          transform: "scale(0.72)",
-          /* Compensate for height collapse after CSS transform */
-          marginBottom: "calc((297mm * 0.72 * 2) - (297mm * 2))",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}>
-          <PrintReportCard result={selected}/>
-        </div>
-      </div>
-    </div>
-  </Modal>
-)}
+      {modal === "print" && selected && (
+        <Modal title={`Report Card — ${selected.studentName}`} onClose={() => setModal(null)} size="xl">
+          <div className="flex justify-end mb-4">
+            <button onClick={handlePrint}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+              <PrinterIcon className="w-4 h-4"/>
+              Print / Save as PDF
+            </button>
+          </div>
+          {/* Outer container: sized to exactly 2 A4 pages at 72% scale */}
+          <div className="overflow-auto rounded-xl bg-slate-200 p-4">
+            <div style={{ width: "calc(210mm * 0.72)", height: "calc(297mm * 2 * 0.72)", margin: "0 auto", overflow: "hidden" }}>
+              <div
+                style={{
+                  width: "210mm",
+                  transformOrigin: "top left",
+                  transform: "scale(0.72)",
+                }}
+              >
+                <PrintReportCard result={selected}/>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* ── DELETE MODAL ── */}
       {modal === "delete" && selected && (

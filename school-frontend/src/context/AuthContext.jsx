@@ -7,9 +7,6 @@ export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On every page load, ask the server "who am I?"
-  // The HttpOnly cookie is sent automatically by the browser.
-  // If the cookie is missing/expired, the server returns 401 → user = null.
   useEffect(() => {
     api.get("/auth/me")
       .then((res) => setUser(res.data.data))
@@ -19,21 +16,28 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
-    // Server sets the HttpOnly cookie automatically in the response.
-    // We just read the user data from the response body.
-    const { id, name, email: userEmail, role, avatar, profileCompleted }
-      = res.data.data;
 
-    const userData = { id, name, email: userEmail, role, avatar, profileCompleted };
+    // Bug #7 fix — teacherId was missing from destructuring before
+    const {
+      id,
+      name,
+      email: userEmail,
+      role,
+      avatar,
+      profileCompleted,
+      teacherId,
+    } = res.data.data;
+
+    const userData = { id, name, email: userEmail, role, avatar, profileCompleted, teacherId };
     setUser(userData);
     return userData;
   };
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout"); // server clears the cookie
+      await api.post("/auth/logout");
     } catch {
-      // continue even if the server call fails
+      // continue even if server call fails
     } finally {
       setUser(null);
     }
