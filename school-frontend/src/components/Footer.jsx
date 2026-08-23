@@ -1,5 +1,4 @@
 import {
-  RiYoutubeLine,
   RiMailLine,
   RiPhoneLine,
   RiMapPinLine,
@@ -36,7 +35,10 @@ export default function Footer() {
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <img
               src={logo}
-              alt="logo"
+              alt="Kid's Joyland Smart English School logo"
+              width={52}
+              height={52}
+              loading="lazy"
               style={{
                 width: "52px",
                 height: "52px",

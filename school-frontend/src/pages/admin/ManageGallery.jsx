@@ -69,8 +69,6 @@ export default function ManageGallery() {
   const [form, setForm] = useState(EMPTY_FORM)
   const fileRef = useRef(null)
 
-  useEffect(() => { fetchImages() }, [])
-
   const fetchImages = async () => {
     try {
       setLoading(true)
@@ -82,6 +80,8 @@ export default function ManageGallery() {
       setLoading(false)
     }
   }
+
+  useEffect(() => { fetchImages() }, [])
 
   const handleSubmit = async () => {
     if (!form.title.trim()) return toast.error('Title is required')

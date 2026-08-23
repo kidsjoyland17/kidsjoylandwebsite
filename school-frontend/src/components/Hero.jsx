@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { RiArrowRightLine, RiCompassDiscoverLine } from "react-icons/ri";
 import api from "@/lib/api";
+import { optimizeImage } from "@/lib/cloudinary";
 
 const stats = [
   { number: "500+", label: "Happy Students" },
@@ -18,7 +19,8 @@ function DistortText({ text, color }) {
   const wrapRef             = useRef(null);
   const [pos, setPos]       = useState({ x: 0, y: 0 });
   const [active, setActive] = useState(false);
-  const uid    = useRef("l" + Math.random().toString(36).substr(2, 6)).current;
+  const rawId  = useId();
+  const uid    = "l" + rawId.replace(/[^a-zA-Z0-9]/g, ""); // sanitize for use in url(#id) refs
   const LENS_R = 60;
 
   const onMove = (e) => {
@@ -195,16 +197,25 @@ export default function Hero() {
         alignItems: "center", justifyContent: "center",
       }}>
 
-        {/* Background images */}
+        {/* Background images — Cloudinary-optimized (was: full-resolution originals for every slide at once) */}
         {banners.map((b, i) => (
-          <div key={b._id} style={{
-            position: "absolute", inset: 0,
-            backgroundImage: `url(${b.imageUrl})`,
-            backgroundSize: "cover", backgroundPosition: "center",
-            opacity: i === current ? 1 : 0,
-            transition: "opacity 0.8s ease",
-            zIndex: 0,
-          }} />
+          <img
+            key={b._id}
+            src={optimizeImage(b.imageUrl, { width: 1920 })}
+            alt=""
+            aria-hidden="true"
+            loading={i === current ? "eager" : "lazy"}
+            fetchPriority={i === current ? "high" : "auto"}
+            decoding="async"
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center",
+              opacity: i === current ? 1 : 0,
+              transition: "opacity 0.8s ease",
+              zIndex: 0,
+            }}
+          />
         ))}
 
         {/* Dark overlay */}

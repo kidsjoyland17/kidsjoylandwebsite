@@ -43,6 +43,11 @@ export default function AdminNotice() {
     targetClass: "All Classes",
   });
 
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const fetchNotices = () => {
     setLoading(true);
     api
@@ -55,11 +60,6 @@ export default function AdminNotice() {
   useEffect(() => {
     fetchNotices();
   }, []);
-
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

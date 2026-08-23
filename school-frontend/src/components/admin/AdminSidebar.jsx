@@ -24,7 +24,6 @@ import {
   RiArrowRightSLine,
   RiFilePdf2Line,
   RiLayoutGridLine,
-  RiLogoutBoxRLine,
 } from "react-icons/ri";
 
 const ICON_MAP = {

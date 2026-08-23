@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-toastify";
 import {
   UsersIcon,
@@ -73,7 +72,6 @@ const EmptyState = ({ search, className }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function TeacherClasses() {
-  const { user } = useAuth();
   const [profile, setProfile]   = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading]   = useState(true);
@@ -117,8 +115,6 @@ export default function TeacherClasses() {
       }
       return (a.name || "").localeCompare(b.name || "");
     });
-
-  const presentCount = students.length; // you can hook into attendance if needed
 
   return (
     <div className="space-y-6">

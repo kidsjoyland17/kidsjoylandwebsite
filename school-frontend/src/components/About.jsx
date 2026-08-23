@@ -1,6 +1,7 @@
 import { RiCheckLine } from "react-icons/ri";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { optimizeImage } from "@/lib/cloudinary";
 
 const highlights = [
   "Value-Based Education",
@@ -11,6 +12,7 @@ const highlights = [
 
 export default function About() {
   const [features, setFeatures] = useState([]);
+  const [aboutImgError, setAboutImgError] = useState(false);
 
   useEffect(() => {
     api.get('/about/features')
@@ -44,11 +46,30 @@ export default function About() {
               overflow: "hidden",
               boxShadow: "0 20px 60px rgba(26,35,126,0.25)",
             }}>
-              <img
-                src="https://res.cloudinary.com/dnubtrt0q/image/upload/q_auto/f_auto/v1777394005/20241129_112922_na3eyd.heic"
-                alt="School"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
+              {aboutImgError ? (
+                <div style={{
+                  width: "100%", height: "100%",
+                  background: "linear-gradient(135deg, #1a237e, #3949ab)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "rgba(255,255,255,0.7)", fontFamily: "'Georgia', serif", fontSize: 14,
+                }}>
+                  School Photo
+                </div>
+              ) : (
+                <img
+                  src={optimizeImage(
+                    "https://res.cloudinary.com/dnubtrt0q/image/upload/v1777394005/20241129_112922_na3eyd.heic",
+                    { width: 900 }
+                  )}
+                  alt="School campus"
+                  width={900}
+                  height={420}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={() => setAboutImgError(true)}
+                />
+              )}
             </div>
           </div>
 
@@ -152,7 +173,7 @@ export default function About() {
 
                   {/* FRONT */}
                   <div className="flip-card-front" style={{
-                    backgroundImage: `url(${f.imageUrl})`,
+                    backgroundImage: `url(${optimizeImage(f.imageUrl, { width: 500, height: 400 })})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     borderRadius: "16px",

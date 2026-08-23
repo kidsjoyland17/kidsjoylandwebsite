@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import {
-  UsersIcon,
   UserCircleIcon,
-  ClipboardDocumentCheckIcon,
   CalendarDaysIcon,
   ArrowRightIcon,
   CheckCircleIcon,
@@ -214,7 +212,6 @@ export default function TeacherDashboard() {
   const [classes,    setClasses]    = useState([]);
   const [timetables, setTimetables] = useState([]);
   const [notices,    setNotices]    = useState([]);
-  const [teacherId,  setTeacherId]  = useState(null);
 
   const [loadingStats,     setLoadingStats]     = useState(true);
   const [loadingClasses,   setLoadingClasses]   = useState(true);
@@ -243,7 +240,6 @@ export default function TeacherDashboard() {
     api.get("/teacher/profile")
       .then((r) => {
         const id = r.data.data?._id;
-        setTeacherId(id);
         if (id) return api.get(`/timetable/teacher/${id}`);
         return { data: { data: [] } };
       })

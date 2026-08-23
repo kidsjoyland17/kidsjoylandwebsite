@@ -65,7 +65,7 @@ export default function Contact() {
   const infoCards = [
     { icon: RiMailLine,   label: "Email Us",     value: "kidsjoyland17@gmail.com" },
     { icon: RiTimeLine,   label: "Office Hours",  value: "Mon – Sat: 8:00 AM – 7:00 PM" },
-    { icon: RiGlobalLine, label: "Website",       value: "www.kidsjoyland.com" },
+    { icon: RiGlobalLine, label: "Website",       value: "www.kidsjoyland.in" },
     { icon: RiPhoneLine,  label: "Helpline",      value: "+91 79034 95153" },
   ];
 

@@ -1,47 +1,61 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import ProtectedRoute from "@/components/shared/ProtectedRoute";
-import AdminLayout from "@/components/layout/AdminLayout";
-import TeacherLayout from "@/components/layout/TeacherLayout";
 
-// Public pages
+// Public pages — loaded eagerly, this is what every visitor sees first
 import LoginPage from "@/pages/auth/LoginPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import HomePage from "@/pages/public/HomePage";
 
+// ── Admin & Teacher areas: code-split so a public visitor never
+//    downloads the admin/teacher dashboards. Each becomes its own
+//    JS chunk, fetched only when someone actually navigates there. ──
+const AdminLayout        = lazy(() => import("@/components/layout/AdminLayout"));
+const TeacherLayout      = lazy(() => import("@/components/layout/TeacherLayout"));
 
-// Admin pages
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminStudents from "@/pages/admin/AdminStudents";
-import AdminTeachers from "@/pages/admin/AdminTeachers";
-import AdminAdmissions from "@/pages/admin/AdminAdmissions";
-import AdminMessages from "@/pages/admin/AdminMessages";
-import ManageBanners from "@/pages/admin/ManageBanners";
-import AdminNotice from "./pages/admin/AdminNotice";
-import AdminAttendance from "@/pages/admin/AdminAttendance";
-import AdminPassout from "@/pages/admin/AdminPassout";
-import ManageGallery from "@/pages/admin/ManageGallery"; // ✅ new gallery page
-import AdminClasses from "@/pages/admin/AdminClasses";
-import AdminResults from "@/pages/admin/Result/AdminResults";
-import AdminTimetable from "./pages/admin/AdminTimetable";
-import ManageAbout from "@/pages/admin/ManageAbout"; // ✅ new about management page
-import ManageTestimonials from "@/pages/admin/ManageTestimonials"; // ✅ new testimonial management page
+const AdminDashboard     = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminStudents      = lazy(() => import("@/pages/admin/AdminStudents"));
+const AdminTeachers      = lazy(() => import("@/pages/admin/AdminTeachers"));
+const AdminAdmissions    = lazy(() => import("@/pages/admin/AdminAdmissions"));
+const AdminMessages      = lazy(() => import("@/pages/admin/AdminMessages"));
+const ManageBanners      = lazy(() => import("@/pages/admin/ManageBanners"));
+const AdminNotice        = lazy(() => import("@/pages/admin/AdminNotice"));
+const AdminAttendance    = lazy(() => import("@/pages/admin/AdminAttendance"));
+const AdminPassout       = lazy(() => import("@/pages/admin/AdminPassout"));
+const ManageGallery      = lazy(() => import("@/pages/admin/ManageGallery"));
+const AdminClasses       = lazy(() => import("@/pages/admin/AdminClasses"));
+const AdminResults       = lazy(() => import("@/pages/admin/Result/AdminResults"));
+const AdminTimetable     = lazy(() => import("@/pages/admin/AdminTimetable"));
+const ManageAbout        = lazy(() => import("@/pages/admin/ManageAbout"));
+const ManageTestimonials = lazy(() => import("@/pages/admin/ManageTestimonials"));
 
-// Teacher pages
-import TeacherDashboard from "@/pages/teacher/TeacherDashboard";
-import TeacherTimetable from "@/pages/teacher/TeacherTimetable";
-import TeacherProfile from "@/pages/teacher/TeacherProfile";
-import TeacherNotice from "@/pages/teacher/TeacherNotice";
-import TeacherClasses from "@/pages/teacher/TeacherClasses";
+const TeacherDashboard   = lazy(() => import("@/pages/teacher/TeacherDashboard"));
+const TeacherTimetable   = lazy(() => import("@/pages/teacher/TeacherTimetable"));
+const TeacherProfile     = lazy(() => import("@/pages/teacher/TeacherProfile"));
+const TeacherNotice      = lazy(() => import("@/pages/teacher/TeacherNotice"));
+const TeacherClasses     = lazy(() => import("@/pages/teacher/TeacherClasses"));
+
+function RouteLoader() {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      height: "100vh", fontSize: 16, color: "#1a237e",
+    }}>
+      Loading…
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Suspense fallback={<RouteLoader />}>
         <Routes>
 
           {/* ── Public ── */}
@@ -94,6 +108,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
+        </Suspense>
         <ToastContainer position="top-right" autoClose={3000} />
       </AuthProvider>
     </BrowserRouter>

@@ -47,6 +47,11 @@ function Field({ label, children, full, error }) {
 }
 
 function SuccessModal({ email, onClose }) {
+  // Generated once when the modal mounts (lazy initializer), not recomputed
+  // on every render — Date.now() during render is an impure call and can
+  // make the displayed ID drift if React re-renders this component.
+  const [appId] = useState(() => Date.now().toString().slice(-8));
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl">
@@ -65,7 +70,7 @@ function SuccessModal({ email, onClose }) {
         <div className="bg-[#f8f9ff] rounded-xl p-3 mb-5 border border-[#e2e8f0]">
           <p className="text-xs text-[#94a3b8] mb-1">Application ID</p>
           <p className="text-[#1a237e] font-mono font-bold tracking-widest">
-            ADM-{Date.now().toString().slice(-8)}
+            ADM-{appId}
           </p>
         </div>
         <p className="text-[#64748b] text-xs mb-5">

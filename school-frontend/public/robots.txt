@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /teacher
+
+Sitemap: https://www.kidsjoyland.com/sitemap.xml

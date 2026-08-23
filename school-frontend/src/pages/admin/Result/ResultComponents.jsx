@@ -370,7 +370,7 @@ export function PrintReportCard({ result }) {
      Only Name, Class, Section, Roll No overlaid.
      Admission No completely removed.
   ══════════════════════ */
-  const CoverPage = () => (
+  const CoverPage = (
     <div className="rc-page">
       <img
         src={report}
@@ -403,7 +403,7 @@ export function PrintReportCard({ result }) {
   );
 
   /* ══ PAGE 2 — ACHIEVEMENT REPORT ══ */
-  const InnerPage = () => (
+  const InnerPage = (
     <div className="rc-page">
       <div className="inner-wrap">
 
@@ -653,8 +653,8 @@ export function PrintReportCard({ result }) {
     <>
       <style>{STYLES}</style>
       <div id="report-card-print" className="rc-wrapper">
-        <CoverPage />
-        <InnerPage />
+        {CoverPage}
+        {InnerPage}
       </div>
     </>
   );

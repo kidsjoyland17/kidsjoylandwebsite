@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import { CLASSES } from "@/constants/routes";
 import {
@@ -8,10 +8,8 @@ import {
   XMarkIcon,
   UserIcon,
   ExclamationTriangleIcon,
-  CheckBadgeIcon,
   ClockIcon,
   AcademicCapIcon,
-  FunnelIcon,
 } from "@heroicons/react/24/outline";
 import { CheckBadgeIcon as CheckBadgeSolid } from "@heroicons/react/24/solid";
 

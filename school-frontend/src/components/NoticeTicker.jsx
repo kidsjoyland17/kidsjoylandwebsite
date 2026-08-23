@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import api from "@/lib/api";
 
 function formatDate(dateStr) {
@@ -143,8 +143,8 @@ export default function NoticeTicker() {
               <span
                 className="text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-full"
                 style={{
-                  background: "#fffff",
-                  color: "#ebd122",
+                  background: "#fef3c7",
+                  color: "#92400e",
                   border: "1px solid rgba(253,230,138,0.6)",
                   letterSpacing: "0.15em",
                 }}
@@ -156,7 +156,7 @@ export default function NoticeTicker() {
             {/* Title */}
             <h2
               className="text-lg font-bold mb-3 pr-6"
-              style={{ color: "#ebd122" }}
+              style={{ color: "#1a237e" }}
             >
               {popup.title}
             </h2>

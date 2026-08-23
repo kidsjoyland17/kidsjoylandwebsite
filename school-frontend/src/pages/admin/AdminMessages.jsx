@@ -100,7 +100,10 @@ export default function AdminMessages() {
     try {
       await api.patch(`/admin/messages/${id}/read`);
       setMessages((prev) => prev.map((m) => (m._id === id ? { ...m, read: true } : m)));
-    } catch {}
+    } catch (err) {
+      console.error("Failed to mark message as read:", err);
+      setError("Failed to mark message as read.");
+    }
   };
 
   const handleDelete = async () => {

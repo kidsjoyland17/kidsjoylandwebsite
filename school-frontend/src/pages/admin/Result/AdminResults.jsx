@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import {
   MagnifyingGlassIcon, PlusIcon, TrashIcon, XMarkIcon,
@@ -6,7 +6,7 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
-import { getGrade, totalObtained, totalFM } from "./constants";
+import { getGrade, totalFM } from "./constants";
 import { Spinner, Modal, PrintReportCard } from "./ResultComponents";
 import ResultForm from "./ResultForm";
 

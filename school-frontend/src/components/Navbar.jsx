@@ -115,7 +115,10 @@ export default function Navbar({ onOpenAdmission }) {
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
           <img
             src={logo}
-            alt="Logo"
+            alt="Kid's Joyland Smart English School logo"
+            width={50}
+            height={50}
+            fetchPriority="high"
             style={{
               width: "50px",
               height: "50px",
@@ -290,7 +293,10 @@ export default function Navbar({ onOpenAdmission }) {
           <div style={{ textAlign: "center", marginTop: "12px", marginBottom: "32px" }}>
             <img
               src={logo}
-              alt="Logo"
+              alt="Kid's Joyland Smart English School logo"
+              width={72}
+              height={72}
+              loading="lazy"
               style={{
                 width: "72px",
                 height: "72px",

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";   // ← add
 import {
-  RiCalendarLine, RiTimeLine, RiUserLine,
+  RiCalendarLine, RiTimeLine,
   RiBookOpenLine, RiInformationLine, RiLoader4Line,
 } from "react-icons/ri";
 
@@ -22,20 +22,6 @@ const fmtTime = (t) => {
   const [h, m] = t.split(":");
   const hr = parseInt(h, 10);
   return `${hr % 12 || 12}:${m} ${hr < 12 ? "AM" : "PM"}`;
-};
-
-const initials = (name = "") =>
-  name.split(" ").slice(0, 2).map((w) => w[0]?.toUpperCase() || "").join("");
-
-const AVATAR_COLORS = [
-  "bg-blue-500", "bg-violet-500", "bg-emerald-500",
-  "bg-rose-500",  "bg-amber-500",  "bg-cyan-500",
-  "bg-pink-500",  "bg-indigo-500",
-];
-const avatarColor = (name = "") => {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 };
 
 /* ─── component ───────────────────────────────────────────── */

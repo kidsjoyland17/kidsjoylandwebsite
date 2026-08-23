@@ -14,8 +14,6 @@ export default function ManageBanners() {
 
   const [form, setForm] = useState({ label: '', title: '', highlight: '', order: '', isActive: true })
 
-  useEffect(() => { fetchBanners() }, [])
-
   const fetchBanners = async () => {
     try {
       setLoading(true)
@@ -27,6 +25,8 @@ export default function ManageBanners() {
       setLoading(false)
     }
   }
+
+  useEffect(() => { fetchBanners() }, [])
 
   const openAdd = () => {
     setEditingBanner(null)

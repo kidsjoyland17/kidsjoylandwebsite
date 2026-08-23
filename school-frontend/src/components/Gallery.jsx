@@ -18,6 +18,7 @@ import {
   MdBrokenImage,
 } from 'react-icons/md'
 import api from '@/lib/api'
+import { optimizeImage, buildSrcSet } from '@/lib/cloudinary'
 
 // ─── Category config ────────────────────────────────────────────
 const CATEGORIES = [
@@ -62,8 +63,14 @@ function GalleryCard({ image, index, onClick }) {
         </div>
       ) : (
         <img
-          src={image.imageUrl}
+          src={optimizeImage(image.imageUrl, { width: 400, height: 300 })}
+          srcSet={buildSrcSet(image.imageUrl, [240, 400, 600])}
+          sizes="(max-width: 480px) 45vw, (max-width: 1024px) 30vw, 22vw"
           alt={image.title}
+          width={400}
+          height={300}
+          loading={index < 8 ? 'eager' : 'lazy'}
+          decoding="async"
           className={`card-img ${loaded ? 'visible' : ''}`}
           onLoad={() => setLoaded(true)}
           onError={() => { setError(true); setLoaded(true) }}
@@ -121,7 +128,13 @@ function Lightbox({ images, currentIndex, onClose, onPrev, onNext }) {
       <div className="lb-card" onClick={e => e.stopPropagation()}>
         <button className="lb-close" onClick={onClose}><MdClose size={20} /></button>
         <div className="lb-img-wrap">
-          <img src={img.imageUrl} alt={img.title} className="lb-img" />
+          <img
+            src={optimizeImage(img.imageUrl, { width: 1200 })}
+            alt={img.title}
+            className="lb-img"
+            loading="eager"
+            decoding="async"
+          />
         </div>
         <div className="lb-info">
           <div className="lb-badge">

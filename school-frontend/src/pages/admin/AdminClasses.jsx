@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import {
-  AcademicCapIcon,
   UsersIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
